@@ -6,8 +6,8 @@ This script pulls a report from SalesForce, and drops it into a Google Sheets wi
 
 * Clone repo
 * npm install
+* Create ./reports directory
 * Create ./auth directory
-* Create ./reports directory 
 * Create ./auth/creds.json and ./auth/okta.js
 * Setup the config file with the Google Sheet ID and Salesforce Report URL
 * Run node createReport.js
