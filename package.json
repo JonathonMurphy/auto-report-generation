@@ -1,0 +1,18 @@
+{
+  "name": "joe-auto-report",
+  "version": "1.0.0",
+  "description": "A script to automatically generate the weekly team call stats report for Joe ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jonathon Seth Murphy",
+  "license": "ISC",
+  "dependencies": {
+    "convert-csv-to-array": "^1.0.3",
+    "google-spreadsheet": "^2.0.7",
+    "prompt": "^1.0.0",
+    "puppeteer": "^1.16.0",
+    "xor-crypt": "^1.1.1"
+  }
+}
