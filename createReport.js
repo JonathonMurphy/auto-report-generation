@@ -64,10 +64,4 @@ fs.watch(reportsPath, (eventType, filename) => {
   setTimeout(function () {
     accessSpreadsheet(entries);
   }, 15000);
-  // fs.createReadStream(__dirname + '/reports/' + filename)
-  // .pipe(csv())
-  // .on('data', (data) => results.values.push(data))
-  // .on('end', () => {
-  //   fs.writeFileSync('./csv-parser-output.json', JSON.stringify(results));
-  // });
 })
