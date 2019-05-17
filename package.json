@@ -9,6 +9,7 @@
   "author": "Jonathon Seth Murphy",
   "license": "ISC",
   "dependencies": {
+    "chokidar": "^2.1.6",
     "convert-csv-to-array": "^1.0.3",
     "google-spreadsheet": "^2.0.7",
     "prompt": "^1.0.0",
