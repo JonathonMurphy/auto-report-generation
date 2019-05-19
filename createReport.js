@@ -22,15 +22,29 @@ const creds = require(credPath),
       runScript = require(libPath + '/runChild.js'),
       downloadReport = libPath + '/downloadReport.js';
 // Fun stuff
-async function accessSpreadsheet(entries) {
+async function updateSpreadsheet(entries) {
   // Grabs the apllicable Google sheet. Pulls from ./config/config.js
   const doc = new GoogleSpreadsheet(config.spreadsheetID);
   await promisify(doc.useServiceAccountAuth)(creds);
   const info = await promisify(doc.getInfo)();
-  const sheet = info.worksheets[config.pageID];
+  const sheet = info.worksheets[config.pageIndex];
+  // Get the cells from the sheet that have data in them
+  const oldCells = await promisify(sheet.getCells)({
+    'min row': 1,
+    'max-row': sheet.rowCount,
+    'min-col': 1,
+    'max-col': sheet.colCount,
+    'return-empty': false
+  });
+  console.log('Removing stale data from sheet.')
+  for (let i = 0; i < oldCells.length; i++) {
+    // Removes the old data
+    oldCells[i].value = '';
+  }
+  sheet.bulkUpdateCells(oldCells);
   // Get the cells in the spreadsheet that are to be worked on
   // TODO: Get the first empty row of the spread sheet / override
-  // all contect that is currently in the selected sheet.page 
+  // all contect that is currently in the selected sheet.page
   const cells = await promisify(sheet.getCells)({
     'min row': 1,
     'max-row': entries.length,
@@ -70,5 +84,5 @@ chokidar.watch(reportsPath, {
   const dataString = dataBuffer.toString();
   let entries = convertCSVToArray(dataString, {header: true, type: 'array', separator: ','});
   // Sends the parsed report through the Google sheets API script
-  accessSpreadsheet(entries);
+  updateSpreadsheet(entries);
 })
