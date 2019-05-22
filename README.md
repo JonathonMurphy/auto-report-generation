@@ -10,6 +10,9 @@ This script pulls a report from SalesForce, and drops it into a Google Sheets wi
   * Install [Node](https://nodejs.org/en/download/) if not already installed on your machine.
 
 * Run npm link - might have to run sudo npm link
+
+  * This will allow you to run the application from anywhere on the command line.
+  
 * Create ./auth/creds.json
 
   * Go to the [Google APIs Console](https://console.developers.google.com/).
