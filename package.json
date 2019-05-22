@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Jonathon Seth Murphy",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "chokidar": "^2.1.6",
     "convert-csv-to-array": "^1.0.3",
