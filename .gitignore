@@ -1,5 +1,5 @@
 node_modules
 auth/*
-!auth/.getkeep
+!auth/.gitkeep
 reports/*
 !reports/.gitkeep
