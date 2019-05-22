@@ -6,6 +6,7 @@ This script pulls a report from SalesForce, and drops it into a Google Sheets wi
 
 * Clone repo
 * Run npm install
+  * Install [Node](https://nodejs.org/en/download/) if not already installed on your machine.
 * Run npm link - might have to run sudo npm link
 * Create ./auth/creds.json
 
@@ -16,7 +17,7 @@ This script pulls a report from SalesForce, and drops it into a Google Sheets wi
   * Name the service account and grant it a Project Role of Editor.
   * Download the JSON file.
   * Copy the JSON file to your auth directory and rename it to creds.json
-  
+
 * Rename config.blank.js to config.js
 * Setup the config file with the Google Sheet ID, Sheet index, and Salesforce Report URL
 * Share the Google Sheet with the email from your creds.json file
