@@ -3,3 +3,5 @@ auth/*
 !auth/.gitkeep
 reports/*
 !reports/.gitkeep
+config/config.joe.js
+config/config.js
