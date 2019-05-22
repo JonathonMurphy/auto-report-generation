@@ -1,4 +1,5 @@
-auth/
 node_modules
+auth/*
+!auth/.getkeep
 reports/*
 !reports/.gitkeep
