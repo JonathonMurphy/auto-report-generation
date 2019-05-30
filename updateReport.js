@@ -28,10 +28,10 @@ const regexTroubleCharacters = /\[|\]|\'|(?<!"),/gi; // Removes [ ] ' and , char
 
 // Puppeteer launch options
 const launchOptions = {
-        headless: false, // Change headless to false to watch puppeteer in action
+        headless: true, // Change headless to false to watch puppeteer in action
         defaultViewport: {
-          width:1091,
-          height:798
+          width:1200,
+          height:800
         }
       };
 
@@ -70,8 +70,7 @@ if (program.bulkUpdate) {
 /** ↓ -i flag section ↓ **/
 if (program.index) {
   let option = config.options[program.index]
-  console.log('config file loaded:\n');
-  console.log(option);
+  console.log('config file loaded: ' + option.reportName);
   (async () => {
     const browser = await puppeteer.launch(launchOptions);
     await autoReport.oktaAuth(browser);
