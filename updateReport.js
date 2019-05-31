@@ -7,6 +7,7 @@ const fs = require('fs'),
       path = require('path'),
       chokidar = require('chokidar'), // A better file watcher
       program = require('commander'), // Command line arguments
+      { promisify } = require('util'),
       puppeteer = require('puppeteer'), // Headless browser
       childProcess = require('child_process'),
       { convertCSVToArray } = require('convert-csv-to-array'), // Name says it all really...
@@ -47,11 +48,77 @@ program
 
 program.parse(process.argv);
 
+// Watches the ./reports directory
+const watcher = chokidar.watch(reportsPath, {
+  ignored: /\.crdownload$/,
+  ignoreInitial: true,
+  persistent: true,
+  awaitWriteFinish: {
+    stabilityThreshold: 2000,
+    pollInterval: 100
+  }
+});
+
+// async function to update a single report
+  // For the -i and -n flags
+async function updateSingleReport(option) {
+  const browser = await puppeteer.launch(launchOptions);
+  await autoReport.oktaAuth(browser);
+  await autoReport.downloadSalesForceReport(option, browser, autoReport.cookies, reportsPath);
+  // Watches the ./reports directory for the incoming report download
+  watcher.on('add', (event, path) => {
+    // Parese the csv file into an array of it's values
+    console.log('Parsing ' + event);
+    const dataBuffer = fs.readFileSync(event);
+    const dataString = dataBuffer.toString();
+    let entries = convertCSVToArray(dataString.replace(regexTroubleCharacters, ''), {
+      header: true,
+      type: 'array',
+      separator: ','
+    });
+    entries.length = entries.length - 7; // Removes the garbage at the end of the generated report from SF
+    // Sends the parsed report through the Google sheets API script
+    autoReport.updateSpreadsheet(option, creds, entries);
+  });
+};
+
+// async function to update mulitple reports at once
+  // For the -a -b and -g flags
+async function updateMultipleReports(options) {
+  const browser = await puppeteer.launch(launchOptions);
+  await autoReport.oktaAuth(browser);
+  for (const option of options) {
+    console.log('Working on report: ' + option.reportName)
+    await autoReport.downloadSalesForceReport(option, browser, autoReport.cookies, reportsPath);
+
+    // Watches the ./reports directory for the incoming report download
+      // Make this an async/await function using promisify?
+        // once instead of on? 
+    await watcher.on('add', function (event, path) {
+      // Parese the csv file into an array of it's values
+      console.log('Parsing ' + event + ' for report ' + option.reportName);
+      const dataBuffer = fs.readFileSync(event);
+      const dataString = dataBuffer.toString();
+      let entries = convertCSVToArray(dataString.replace(regexTroubleCharacters, ''), {
+        header: true,
+        type: 'array',
+        separator: ','
+      });
+      entries.length = entries.length - 7; // Removes the garbage at the end of the report
+    })
+    // Sends the parsed report through the Google sheets API script
+    await autoReport.updateSpreadsheet(option, creds, entries);
+
+  }
+};
+
 /** ↓ -a flag section ↓ **/
 if (program.all) {
+  console.log('Configs file loaded.');
   config.options.forEach((option => {
-    console.log(option)
+    console.log('Report name: ' + option.reportName);
   }))
+  updateMultipleReports(options);
 }
 /** ↑ -a flag section ↑ **/
 
@@ -60,37 +127,36 @@ if (program.all) {
   // Filters objects in the config file by the runInBulkUpdate value set to true
 if (program.bulkUpdate) {
   const options = config.options.filter(option => option.runInBulkUpdate === true);
+  console.log('Configs file loaded.');
   options.forEach((option) => {
-    console.log(option)
+    console.log('Report name: ' + option.reportName);
   })
+  updateMultipleReports(options);
 }
 /** ↑ -b flag section ↑ **/
+
+
+/** ↓ -g flag section ↓ **/
+  // Filters objects in the config file by the groupName value matching the command line arg
+if (program.groupName) {
+  const options = config.options.filter(option => option.groupName === program.groupName);
+  console.log('Configs file loaded.');
+  options.forEach((option) => {
+    console.log('Report name: ' + option.reportName);
+  })
+  updateMultipleReports(options);
+}
+/** ↑ -g flag section ↑ **/
 
 
 /** ↓ -i flag section ↓ **/
 if (program.index) {
   let option = config.options[program.index]
-  console.log('config file loaded: ' + option.reportName);
-  (async () => {
-    const browser = await puppeteer.launch(launchOptions);
-    await autoReport.oktaAuth(browser);
-    await autoReport.downloadSalesForceReport(option, browser, autoReport.cookies, reportsPath);
-    // Watches the ./reports directory for the incoming report download
-    chokidar.watch(reportsPath, {
-      ignored: /\.crdownload$/,
-      ignoreInitial: true,
-      persistent: true
-    }).on('all', (event, path) => {
-      // Parese the csv file into an array of it's values
-      console.log('Parsing ' + path);
-      const dataBuffer = fs.readFileSync(path);
-      const dataString = dataBuffer.toString();
-      let entries = convertCSVToArray(dataString.replace(regexTroubleCharacters, ''), {header: true, type: 'array', separator: ','});
-      entries.length = entries.length - 7; // Removes the garbage at the end of the generated report from SF
-      // Sends the parsed report through the Google sheets API script
-      autoReport.updateSpreadsheet(option, browser, creds, entries);
-    })
-  })();
+  console.log('Config file loaded.\nReport name: ' + option.reportName);
+  updateSingleReport(option, () => {
+    browser.close();
+    process.exit();
+  });
 }
 /** ↑ -i flag section ↑ **/
 
@@ -99,17 +165,10 @@ if (program.index) {
   // Finds the object in the config file with the corresponding name to the command line arg
 if (program.reportName) {
   const option = config.options.find(option => option.reportName === program.reportName);
-  console.log(option)
+  console.log('Config file loaded\nReport name: ' + option.reportName)
+  updateSingleReport(option, () => {
+    browser.close();
+    process.exit();
+  });
 }
 /** ↑ -n flag section ↑ **/
-
-
-/** ↓ -g flag section ↓ **/
-  // Filters objects in the config file by the groupName value matching the command line arg
-if (program.groupName) {
-  const options = config.options.filter(option => option.groupName === program.groupName);
-  options.forEach((option) => {
-    console.log(option)
-  })
-}
-/** ↑ -g flag section ↑ **/

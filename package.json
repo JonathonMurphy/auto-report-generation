@@ -1,6 +1,6 @@
 {
   "name": "Auto Report Generation Command Line Utility",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "description": "A CLI tool to automatically generate reports from Salesforce, and dump the contents into Google Sheets for analytics.",
   "repository": "github:JonathonMurphy/Auto-Report-Generation",
   "main": "index.js",
@@ -18,7 +18,7 @@
     "puppeteer": "^1.16.0"
   },
   "bin": {
-    "updateeReport": "./createReport.js"
+    "updateReport": "./updateReport.js"
   },
   "man": "./man/man.md"
 }
