@@ -56,6 +56,7 @@ async function updateSingleReport(option) {
   const browser = await puppeteer.launch(launchOptions);
   await autoReport.oktaAuth(browser);
   await autoReport.downloadSalesForceReport(option, browser, autoReport.cookies, reportsPath);
+  // Watches the ./reports sub-directories
   const watcher = chokidar.watch(reportsPath + '/' + option.reportName, {
     ignored: /\.crdownload$/,
     ignoreInitial: true,
@@ -67,6 +68,8 @@ async function updateSingleReport(option) {
   });
   // Watches the ./reports directory for the incoming report download
   watcher.on('add', (event, path) => {
+    browser.close();
+    watcher.close();
     // Parese the csv file into an array of it's values
     console.log('Parsing ' + event);
     const dataBuffer = fs.readFileSync(event);
@@ -89,7 +92,7 @@ async function updateMultipleReports(options) {
   await autoReport.oktaAuth(browser);
   for (let option of options) {
     console.log('Working on report: ' + option.reportName);
-    // Watches the ./reports directory
+    // Watches the ./reports sub-directories
     const watcher = chokidar.watch(reportsPath + '/' + option.reportName, {
       ignored: /\.crdownload$/,
       ignoreInitial: true,
@@ -100,6 +103,7 @@ async function updateMultipleReports(options) {
       }
     });
     watcher.on('add', function (event, path) {
+      watcher.close();
       // Parese the csv file into an array of it's values
       console.log('Parsing ' + event);
       const dataBuffer = fs.readFileSync(event);
@@ -114,7 +118,6 @@ async function updateMultipleReports(options) {
       autoReport.updateSpreadsheet(option, creds, entries);
     });
     await autoReport.downloadSalesForceReport(option, browser, autoReport.cookies, reportsPath);
-
   }
 };
 
@@ -125,13 +128,12 @@ if (program.all) {
     console.log('Report name: ' + option.reportName);
   }))
   updateMultipleReports(options, () => {
+    watcher.close();
     browser.close();
     process.exit();
   });
 }
 /** ↑ -a flag section ↑ **/
-
-
 /** ↓ -b flag section ↓ **/
   // Filters objects in the config file by the runInBulkUpdate value set to true
 if (program.bulkUpdate) {
@@ -141,13 +143,12 @@ if (program.bulkUpdate) {
     console.log('Report name: ' + option.reportName);
   })
   updateMultipleReports(options, () => {
+    watcher.close();
     browser.close();
     process.exit();
   });
 }
 /** ↑ -b flag section ↑ **/
-
-
 /** ↓ -g flag section ↓ **/
   // Filters objects in the config file by the groupName value matching the command line arg
 if (program.groupName) {
@@ -157,6 +158,7 @@ if (program.groupName) {
     console.log('Report name: ' + option.reportName);
   })
   updateMultipleReports(options, () => {
+    watcher.close();
     browser.close();
     process.exit();
   });
@@ -168,21 +170,17 @@ if (program.groupName) {
 if (program.index) {
   let option = config.options[program.index]
   console.log('Config file loaded.\nReport name: ' + option.reportName);
-  updateSingleReport(option, () => {
-    browser.close();
+  updateSingleReport(option, function () {
     process.exit();
   });
 }
 /** ↑ -i flag section ↑ **/
-
-
 /** ↓ -n flag section ↓ **/
   // Finds the object in the config file with the corresponding name to the command line arg
 if (program.reportName) {
   const option = config.options.find(option => option.reportName === program.reportName);
   console.log('Config file loaded\nReport name: ' + option.reportName)
-  updateSingleReport(option, () => {
-    browser.close();
+  updateSingleReport(option, function () {
     process.exit();
   });
 }
