@@ -41,7 +41,7 @@ This script pulls a report from SalesForce, and drops it into a Google Sheets wi
 
 ## Next Milestone
 
-* Add functionality to pull reporting data from additional sources ie; Talkdesk, Jira, Intercom, etc..
+* Add functionality to pull reports from additional sources ie; Talkdesk, Jira, Intercom, etc..
 
 ## Author
 
