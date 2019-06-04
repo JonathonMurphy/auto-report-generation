@@ -1,6 +1,4 @@
 node_modules
-auth/*
-!auth/.gitkeep
 reports/*
 !reports/.gitkeep
 config/*
