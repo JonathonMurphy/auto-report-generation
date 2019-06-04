@@ -91,7 +91,7 @@ async function updateMultipleReports(options) {
   const browser = await puppeteer.launch(launchOptions);
   await autoReport.oktaAuth(browser);
   for (let option of options) {
-    console.log('Working on report: ' + option.reportName);
+
     // Watches the ./reports sub-directories
     const watcher = chokidar.watch(reportsPath + '/' + option.reportName, {
       ignored: /\.crdownload$/,
@@ -103,6 +103,10 @@ async function updateMultipleReports(options) {
       }
     });
     watcher.on('add', function (event, path) {
+      // Checks if this is the last item in the array of options, and if it is, close the browser 
+      if (option == options[options.length-1]) {
+        browser.close();
+      }
       watcher.close();
       // Parese the csv file into an array of it's values
       console.log('Parsing ' + event);
@@ -127,13 +131,10 @@ if (program.all) {
   config.options.forEach((option => {
     console.log('Report name: ' + option.reportName);
   }))
-  updateMultipleReports(options, () => {
-    watcher.close();
-    browser.close();
-    process.exit();
-  });
+  updateMultipleReports(options);
 }
 /** ↑ -a flag section ↑ **/
+
 /** ↓ -b flag section ↓ **/
   // Filters objects in the config file by the runInBulkUpdate value set to true
 if (program.bulkUpdate) {
@@ -142,11 +143,7 @@ if (program.bulkUpdate) {
   options.forEach((option) => {
     console.log('Report name: ' + option.reportName);
   })
-  updateMultipleReports(options, () => {
-    watcher.close();
-    browser.close();
-    process.exit();
-  });
+  updateMultipleReports(options);
 }
 /** ↑ -b flag section ↑ **/
 /** ↓ -g flag section ↓ **/
@@ -157,11 +154,7 @@ if (program.groupName) {
   options.forEach((option) => {
     console.log('Report name: ' + option.reportName);
   })
-  updateMultipleReports(options, () => {
-    watcher.close();
-    browser.close();
-    process.exit();
-  });
+  updateMultipleReports(options);
 }
 /** ↑ -g flag section ↑ **/
 
@@ -170,18 +163,15 @@ if (program.groupName) {
 if (program.index) {
   let option = config.options[program.index]
   console.log('Config file loaded.\nReport name: ' + option.reportName);
-  updateSingleReport(option, function () {
-    process.exit();
-  });
+  updateSingleReport(option);
 }
 /** ↑ -i flag section ↑ **/
+
 /** ↓ -n flag section ↓ **/
   // Finds the object in the config file with the corresponding name to the command line arg
 if (program.reportName) {
   const option = config.options.find(option => option.reportName === program.reportName);
   console.log('Config file loaded\nReport name: ' + option.reportName)
-  updateSingleReport(option, function () {
-    process.exit();
-  });
+  updateSingleReport(option);
 }
 /** ↑ -n flag section ↑ **/
