@@ -1,8 +1,8 @@
 node_modules
-reports/*
-!reports/.gitkeep
-config/*
-!config/config.blank.js
 auth/*
 !auth/.gitkeep
+config/*
+!config/config.blank.js
+reports/*
+!reports/.gitkeep
 TODO.md
