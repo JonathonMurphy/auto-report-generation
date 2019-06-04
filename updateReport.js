@@ -56,6 +56,15 @@ async function updateSingleReport(option) {
   const browser = await puppeteer.launch(launchOptions);
   await autoReport.oktaAuth(browser);
   await autoReport.downloadSalesForceReport(option, browser, autoReport.cookies, reportsPath);
+  const watcher = chokidar.watch(reportsPath + '/' + option.reportName, {
+    ignored: /\.crdownload$/,
+    ignoreInitial: true,
+    persistent: true,
+    awaitWriteFinish: {
+      stabilityThreshold: 2000,
+      pollInterval: 100
+    }
+  });
   // Watches the ./reports directory for the incoming report download
   watcher.on('add', (event, path) => {
     // Parese the csv file into an array of it's values
@@ -76,11 +85,10 @@ async function updateSingleReport(option) {
 // async function to update mulitple reports at once
   // For the -a -b and -g flags
 async function updateMultipleReports(options) {
-  // const browser = await puppeteer.launch(launchOptions);
-  // await autoReport.oktaAuth(browser);
+  const browser = await puppeteer.launch(launchOptions);
+  await autoReport.oktaAuth(browser);
   for (let option of options) {
     console.log('Working on report: ' + option.reportName);
-    console.log('Watching: ' + reportsPath + '/' + option.reportName);
     // Watches the ./reports directory
     const watcher = chokidar.watch(reportsPath + '/' + option.reportName, {
       ignored: /\.crdownload$/,
@@ -92,29 +100,20 @@ async function updateMultipleReports(options) {
       }
     });
     watcher.on('add', function (event, path) {
-      option.filePath = event;
-      console.log(option);
+      // Parese the csv file into an array of it's values
+      console.log('Parsing ' + event);
+      const dataBuffer = fs.readFileSync(event);
+      const dataString = dataBuffer.toString();
+      let entries = convertCSVToArray(dataString.replace(regexTroubleCharacters, ''), {
+        header: true,
+        type: 'array',
+        separator: ','
+      });
+      entries.length = entries.length - 7; // Removes the garbage at the end of the downloaded report
+      // Sends the parsed report through the Google sheets API script
+      autoReport.updateSpreadsheet(option, creds, entries);
     });
-
-    // await autoReport.downloadSalesForceReport(option, browser, autoReport.cookies, reportsPath);
-
-    // Watches the ./reports directory for the incoming report download
-      // Make this an async/await function using promisify?
-        // once instead of on?
-    // await watcher.once('add', async function (event, path) {
-      // Parse the csv file into an array of it's values
-      // console.log('Parsing ' + event + ' for report ' + option.reportName);
-      // const dataBuffer = fs.readFileSync(event);
-      // const dataString = dataBuffer.toString();
-      // let entries = convertCSVToArray(dataString.replace(regexTroubleCharacters, ''), {
-      //   header: true,
-      //   type: 'array',
-      //   separator: ','
-      // });
-      // entries.length = entries.length - 7; // Removes the garbage at the end of the report
-    // })
-    // Sends the parsed report through the Google sheets API script
-    // await autoReport.updateSpreadsheet(option, creds, entries);
+    await autoReport.downloadSalesForceReport(option, browser, autoReport.cookies, reportsPath);
 
   }
 };
@@ -125,7 +124,10 @@ if (program.all) {
   config.options.forEach((option => {
     console.log('Report name: ' + option.reportName);
   }))
-  updateMultipleReports(options);
+  updateMultipleReports(options, () => {
+    browser.close();
+    process.exit();
+  });
 }
 /** ↑ -a flag section ↑ **/
 
@@ -138,7 +140,10 @@ if (program.bulkUpdate) {
   options.forEach((option) => {
     console.log('Report name: ' + option.reportName);
   })
-  updateMultipleReports(options);
+  updateMultipleReports(options, () => {
+    browser.close();
+    process.exit();
+  });
 }
 /** ↑ -b flag section ↑ **/
 
@@ -151,7 +156,10 @@ if (program.groupName) {
   options.forEach((option) => {
     console.log('Report name: ' + option.reportName);
   })
-  updateMultipleReports(options);
+  updateMultipleReports(options, () => {
+    browser.close();
+    process.exit();
+  });
 }
 /** ↑ -g flag section ↑ **/
 
