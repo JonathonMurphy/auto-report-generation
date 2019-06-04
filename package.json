@@ -1,7 +1,8 @@
 {
-  "name": "joe-auto-report",
-  "version": "1.0.0",
-  "description": "A script to automatically generate the weekly team call stats report for Joe ",
+  "name": "Auto Report Generation Command Line Utility",
+  "version": "1.5.0",
+  "description": "A CLI tool to automatically generate reports from Salesforce, and dump the contents into Google Sheets for analytics.",
+  "repository": "github:JonathonMurphy/Auto-Report-Generation",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,12 +11,14 @@
   "license": "MIT",
   "dependencies": {
     "chokidar": "^2.1.6",
+    "commander": "^2.20.0",
     "convert-csv-to-array": "^1.0.3",
     "google-spreadsheet": "^2.0.7",
     "prompt": "^1.0.0",
     "puppeteer": "^1.16.0"
   },
   "bin": {
-    "createReport": "./createReport.js"
-  }
+    "updateReport": "./updateReport.js"
+  },
+  "man": "./man/man.md"
 }
