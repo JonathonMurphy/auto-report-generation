@@ -21,7 +21,7 @@ const libPath = path.resolve(__dirname, './lib'),
 const runScript = require(libPath + '/runChild.js'),
       autoReport = require(libPath + '/autoReport.js'),
       pkg = require(path.resolve(__dirname, './package.json')),
-      creds = require(path.resolve(__dirname, './lib/.creds.json')),
+      creds = require(path.resolve(__dirname, './auth/creds.json')),
       config = require(path.resolve(__dirname, './config/config.new.js'));
 
 // Reggie
