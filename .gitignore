@@ -3,4 +3,6 @@ reports/*
 !reports/.gitkeep
 config/*
 !config/config.blank.js
+auth/*
+!auth/.gitkeep
 TODO.md
