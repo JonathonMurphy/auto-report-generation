@@ -26,7 +26,7 @@ This script pulls a report from SalesForce, and drops it into a Google Sheets wi
 
 * Rename config.blank.js to config.js
 * Setup the config file with the Google Sheet ID, Sheet index, Salesforce Report URL, etc.
-* Share your Google Sheets with this email: sf-reports@wise-karma-240719.iam.gserviceaccount.com
+* Share your Google Sheets with the client_email in your ./auth/creds.json file
 * You can now enter 'updateReport' from the command line to have your report automatically updated.
 
 ## Command Line Flags
