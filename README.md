@@ -1,5 +1,13 @@
 # Automatic Report Generation
 
+## No longer in development
+
+¯\\\_(ツ)_/¯
+
+So apparently theres a plugin for Google Sheets called [Data Connector for SalesForce](https://gsuite.google.com/marketplace/app/data_connector_for_salesforce/857627895310) that already does this. I am discontinuing development on this project.
+
+## Description
+
 This script pulls a report from SalesForce, and drops it into a Google Sheets with just the touch of a button.
 
 ## Setup
