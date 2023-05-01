@@ -13,7 +13,7 @@
     "chokidar": "^2.1.6",
     "commander": "^2.20.0",
     "convert-csv-to-array": "^1.0.3",
-    "google-spreadsheet": "^2.0.7",
+    "google-spreadsheet": "^3.3.0",
     "prompt": "^1.0.0",
     "puppeteer": "^1.16.0"
   },
